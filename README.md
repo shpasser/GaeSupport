@@ -1,7 +1,33 @@
-GaeSupport
-==========
+# GaeSupport
 
 Google App Engine Support package for Laravel 4
 
-This README file will be maintained while testing and extending the package.
-After the initial tests this file will grow and include more details.
+## Installation
+
+Pull in the package via Composer.
+
+```js
+"require": {
+    "shpasser/gae-support": "~1.0"
+}
+```
+
+Then include the service provider within `app/config/app.php`.
+
+```php
+'providers' => [
+    'Shpasser\GaeSupport\GaeSupportServiceProvider'
+];
+```
+
+## Usage
+
+Generate the GAE related files / entries.
+
+ ```bash
+ php artisan gae:setup --config `your-app-id`
+ ```
+
+## Deploy
+
+Download and install the GAE SDK for PHP and deploy your app.
