@@ -55,6 +55,11 @@ class Configurator {
             'Shpasser\GaeSupport\Foundation\Application',
             $contents);
 
+        if ($modified === $contents)
+        {
+            return;
+        }
+
         file_put_contents($start_php, $modified);
 
         $this->myCommand->info('Replaced the application class in "start.php".');
@@ -86,6 +91,11 @@ class Configurator {
 
         $modified = str_replace($strings, $replacements, $contents);
 
+        if ($modified === $contents)
+        {
+            return;
+        }
+
         file_put_contents($app_php, $modified);
 
         $this->myCommand->info('Replaced the service providers in "app.php".');
@@ -98,7 +108,22 @@ class Configurator {
     protected function generateProductionConfig()
     {
         $productionDir = app_path().'/config/production';
-        mkdir($productionDir);
+
+        if (file_exists($productionDir))
+        {
+            $overwrite = $this->myCommand->confirm(
+                'Overwrite the existing production config files?', false
+            );
+
+            if ( ! $overwrite)
+            {
+                return;
+            }
+        }
+        else
+        {
+            mkdir($productionDir);
+        }
 
         $configTemplatesPath = __DIR__.'/templates/config';
         $configFiles = [
@@ -129,6 +154,19 @@ class Configurator {
 
         $srcPath = "{$startTemplatesPath}/production.php";
         $destPath = "{$startDir}/production.php";
+
+        if (file_exists($destPath))
+        {
+            $overwrite = $this->myCommand->confirm(
+                'Overwrite the existing production start file?', false
+            );
+
+            if ( ! $overwrite)
+            {
+                return;
+            }
+        }
+
         copy($srcPath, $destPath);
 
         $this->myCommand->info('Generated the production start files.');
