@@ -29,6 +29,7 @@ class Configurator {
     {
         $this->replaceAppClass();
         $this->generateProductionConfig();
+        $this->generateProductionStart();
         $this->replaceLaravelServiceProviders();
 
         if ($generateConfig)
@@ -49,14 +50,14 @@ class Configurator {
 
         $contents = file_get_contents($start_php);
 
-        preg_replace(
+        $modified = str_replace(
             'Illuminate\Foundation\Application',
             'Shpasser\GaeSupport\Foundation\Application',
             $contents);
 
-        file_put_contents($start_php, $contents);
+        file_put_contents($start_php, $modified);
 
-        $this->comment('Replaced the application class in "start.php".');
+        $this->myCommand->info('Replaced the application class in "start.php".');
     }
 
     /**
@@ -70,7 +71,7 @@ class Configurator {
 
         $contents = file_get_contents($app_php);
 
-        $patterns = [
+        $strings = [
             'Illuminate\Mail\MailServiceProvider',
             'Illuminate\Queue\QueueServiceProvider'
         ];
@@ -83,11 +84,11 @@ class Configurator {
             'Shpasser\GaeSupport\Queue\QueueServiceProvider'
         ];
 
-        preg_replace($patterns, $replacements, $contents);
+        $modified = str_replace($strings, $replacements, $contents);
 
-        file_put_contents($app_php, $contents);
+        file_put_contents($app_php, $modified);
 
-        $this->comment('Replaced the service providers in "app.php".');
+        $this->myCommand->info('Replaced the service providers in "app.php".');
     }
 
     /**
@@ -114,7 +115,23 @@ class Configurator {
             copy($srcPath, $destPath);
         }
 
-        $this->comment('Generated the production config. files.');
+        $this->myCommand->info('Generated production config files.');
+    }
+
+    /**
+     * Generates the start files
+     * for a Laravel GAE app.
+     */
+    protected function generateProductionStart()
+    {
+        $startDir = app_path().'/start';
+        $startTemplatesPath = __DIR__.'/templates/start';
+
+        $srcPath = "{$startTemplatesPath}/production.php";
+        $destPath = "{$startDir}/production.php";
+        copy($srcPath, $destPath);
+
+        $this->myCommand->info('Generated the production start files.');
     }
 
     /**
@@ -188,7 +205,7 @@ EOT;
 
         file_put_contents($filePath, $contents);
 
-        $this->comment('Generated the "app.yaml" file.');
+        $this->myCommand->info('Generated the "app.yaml" file.');
     }
 
     /**
@@ -220,7 +237,7 @@ allow_url_include = 1
 EOT;
         file_put_contents($filePath, $contents);
 
-        $this->comment('Generated the "php.ini" file.');
+        $this->myCommand->info('Generated the "php.ini" file.');
     }
 
     /**

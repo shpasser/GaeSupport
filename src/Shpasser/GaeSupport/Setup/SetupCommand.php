@@ -36,7 +36,7 @@ class SetupCommand extends Command {
 	public function fire()
 	{
 		$configurator = new Configurator($this);
-		$configurator->configure($this->argument('app-id'), $this->option('generate-config'));
+		$configurator->configure($this->argument('app-id'), $this->option('config'));
 	}
 
 	/**
@@ -59,7 +59,7 @@ class SetupCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('config', null, InputOption::VALUE_OPTIONAL, 'Generate "app.yaml" and "php.ini" config files.', null),
+			array('config', null, InputOption::VALUE_NONE, 'Generate "app.yaml" and "php.ini" config files.', null),
 		);
 	}
 

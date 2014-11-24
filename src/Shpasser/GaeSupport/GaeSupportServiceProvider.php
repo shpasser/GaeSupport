@@ -24,7 +24,7 @@ class GaeSupportServiceProvider extends ServiceProvider {
 			return new SetupCommand;
 		});
 
-		$this->commands('gae.deploy', 'gae.setup');
+		$this->commands('gae.setup');
 	}
 
 	/**
