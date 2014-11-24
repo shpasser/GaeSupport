@@ -1,6 +1,7 @@
 {
     "name": "shpasser/gae-support",
-    "description": "",
+    "description": "Google App Engine Support for Laravel apps.",
+    "license": "MIT",
     "authors": [
         {
             "name": "Ron Shpasser",
