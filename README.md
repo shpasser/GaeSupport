@@ -1,6 +1,12 @@
 # GaeSupport
 
-Google App Engine Support package for Laravel 4
+Google App Engine Support package for Laravel 4.
+
+Currently supported features:
+- Generation of general configuration files,
+- Mail service provider,
+- Queue service provider.
+
 
 ## Installation
 
@@ -28,6 +34,10 @@ Generate the GAE related files / entries.
  php artisan gae:setup --config `your-app-id`
  ```
 
+### Mail and Queue Service Providers
+
+Documentation is in progress, please stay tuned!
+
 ## Deploy
 
-Download and install the GAE SDK for PHP and deploy your app.
+Download and install GAE SDK for PHP and deploy your app.
