@@ -53,17 +53,30 @@ class GaeTransport implements Swift_Transport {
 	public function send(Swift_Mime_Message $message, &$failedRecipients = null)
 	{
         try {
-            $emails = implode(', ', array_keys((array) $message->getTo()));
-            $subj = $message->getSubject();
-            $body = $message->getBody();
+            $to = implode(', ', array_keys((array) $message->getTo()));
+			$cc = implode(', ', array_keys((array) $message->getCc()));
+			$bcc = implode(', ', array_keys((array) $message->getBcc()));
+			$replyto = '';
+
+			foreach ($message->getReplyTo() as $address => $name)
+			{
+				$replyto = $address;
+				break;
+			}
+
             $mail_options = [
-                "sender" => "admin@" . $this->app->getGaeAppId() . ".appspotmail.com",
-                "to" => $emails,
-                "subject" => $subj,
-                "htmlBody" => $body
+                "sender"	=> "admin@" . $this->app->getGaeAppId() . ".appspotmail.com",
+                "to"		=> $to,
+                "subject"	=> $message->getSubject(),
+                "htmlBody"	=> $message->getBody()
             ];
+
+			if ($cc  !== '') 		$mail_options['cc'] = $cc;
+			if ($bcc !== '') 		$mail_options['bcc'] = $bcc;
+			if ($replyto !== '')	$mail_options['replyto'] = $replyto;
+
             $gae_message = new GAEMessage($mail_options);
-            $gae_message->send();
+			$gae_message->send();
         } catch (InvalidArgumentException $e) {
             syslog(LOG_WARNING, "Exception sending mail: " . $e);
         }
