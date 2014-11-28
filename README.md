@@ -1,6 +1,6 @@
 # GaeSupport
 
-Google App Engine Support package for Laravel 4.
+Google App Engine(GAE) Support package for Laravel 4.
 
 Currently supported features:
 - Generation of general configuration files,
@@ -46,7 +46,47 @@ supported by both Swift Mailer and Google App engine.
 
 ### Queues
 
-Documentation is in progress, please stay tuned!
+The generated queue configuration file `app/config/production/queue.php` should contain:
+
+```php
+return array(
+
+	'default' => 'gae',
+
+	/*
+	|--------------------------------------------------------------------------
+	| GAE Queue Connection
+	|--------------------------------------------------------------------------
+	|
+	*/
+
+	'connections' => array(
+
+		'gae' => array(
+			'driver'	=> 'gae',
+			'queue'		=> 'default',
+			'url'		=> '/tasks',
+			'encrypt'	=> true,
+		),
+	),
+
+);
+```
+
+The 'default' queue and encryption are used by default. 
+In order to use the queue your `app/routes.php` file should contain the following route:
+
+```php
+Route::post('tasks', array('as' => 'tasks',
+function()
+{
+	return Queue::marshal();
+}));
+```
+  
+This route will be used by the GAE queue to push the jobs. Please notice that the route
+and the GAE Queue Connection 'url' parameter point to the same URL.
+For more information on the matter please see http://laravel.com/docs/4.2/queues#push-queues.
 
 ## Deploy
 
