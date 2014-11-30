@@ -3,12 +3,9 @@
 use Illuminate\Console\Command;
 
 /**
- * Created by PhpStorm.
- * Author: Ron Shpasser
- * Date: 11/18/14
- * Time: 5:10 PM
+ * Class Configurator
+ * @package Shpasser\GaeSupport\Setup
  */
-
 
 class Configurator {
 
@@ -29,7 +26,8 @@ class Configurator {
     {
         $this->replaceAppClass();
         $this->generateProductionConfig();
-        $this->generateProductionStart();
+        $this->commentOutDefaultLogInit();
+        $this->generateLogInit();
         $this->replaceLaravelServiceProviders();
 
         if ($generateConfig)
@@ -143,33 +141,70 @@ class Configurator {
         $this->myCommand->info('Generated production config files.');
     }
 
+
     /**
-     * Generates the start files
+     * Comments out the default log initialization code.
+     */
+    protected function commentOutDefaultLogInit()
+    {
+        $global_php = app_path().'/start/global.php';
+
+        $find = "Log::useFiles(storage_path().'/logs/laravel.log');"
+        $replace = "/* Log initialization moved to 'app/start/local.php' and 'app/start/production.php' files. */";
+
+        $this->createBackupFile($global_php);
+
+        $contents = file_get_contents($global_php);
+
+        $modified = str_replace($find, $replace, $contents);
+
+        if ($modified === $contents)
+        {
+            return;
+        }
+
+        file_put_contents($global_php, $modified);
+
+        $this->myCommand->info('Commented out the default log initialization code in "global.php".');
+
+    }
+
+    /**
+     * Generates the log initialization
      * for a Laravel GAE app.
      */
-    protected function generateProductionStart()
+    protected function generateLogInit()
     {
         $startDir = app_path().'/start';
         $startTemplatesPath = __DIR__.'/templates/start';
 
-        $srcPath = "{$startTemplatesPath}/production.php";
-        $destPath = "{$startDir}/production.php";
+        $startFiles = [
+            'local.php',
+            'production.php'
+        ];
 
-        if (file_exists($destPath))
+        foreach ($startFiles as $filename)
         {
-            $overwrite = $this->myCommand->confirm(
-                'Overwrite the existing production start file?', false
-            );
+            $srcPath = "{$startTemplatesPath}/{$filename}";
+            $destPath = "{$startDir}/{$filename}";
 
-            if ( ! $overwrite)
+            if (file_exists($destPath))
             {
-                return;
+                $overwrite = $this->myCommand->confirm(
+                    "Overwrite the existing {$destPath} file?", false
+                );
+
+                if ( ! $overwrite)
+                {
+                    continue;
+                }
             }
+
+            $this->createBackupFile($destPath);
+            copy($srcPath, $destPath);
         }
 
-        copy($srcPath, $destPath);
-
-        $this->myCommand->info('Generated the production start files.');
+        $this->myCommand->info('Generated the log initialization files.');
     }
 
     /**

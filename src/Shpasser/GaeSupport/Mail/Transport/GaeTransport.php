@@ -7,6 +7,8 @@ use Swift_Attachment;
 
 use Shpasser\GaeSupport\Foundation\Application;
 
+use Illuminate\Support\Facades\Log;
+
 require_once 'google/appengine/api/mail/Message.php';
 use google\appengine\api\mail\Message as GAEMessage;
 
@@ -54,7 +56,8 @@ class GaeTransport implements Swift_Transport {
 	 */
 	public function send(Swift_Mime_Message $message, &$failedRecipients = null)
 	{
-        try {
+        try
+		{
             $to = implode(', ', array_keys((array) $message->getTo()));
 			$cc = implode(', ', array_keys((array) $message->getCc()));
 			$bcc = implode(', ', array_keys((array) $message->getBcc()));
@@ -67,7 +70,7 @@ class GaeTransport implements Swift_Transport {
 			}
 
             $mail_options = [
-                "sender"	=> "admin@" . $this->app->getGaeAppId() . ".appspotmail.com",
+                "sender"	=> "admin@{$this->app->getGaeAppId()}.appspotmail.com",
                 "to"		=> $to,
                 "subject"	=> $message->getSubject(),
                 "htmlBody"	=> $message->getBody()
@@ -78,12 +81,17 @@ class GaeTransport implements Swift_Transport {
 			if ($replyto !== '')	$mail_options['replyto'] = $replyto;
 
 			$attachments = $this->getAttachmentsArray($message);
-			if (count($attachments) > 0) $mail_options['attachments'] = $attachments;
+			if (count($attachments) > 0)
+			{
+				$mail_options['attachments'] = $attachments;
+			}
 
 			$gae_message = new GAEMessage($mail_options);
 			$gae_message->send();
-        } catch (InvalidArgumentException $e) {
-            syslog(LOG_WARNING, "Exception sending mail: " . $e);
+		}
+		catch (InvalidArgumentException $ex)
+		{
+			Log::warning("Exception sending mail: ".$ex);
         }
 	}
 
