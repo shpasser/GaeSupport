@@ -149,7 +149,7 @@ class Configurator {
     {
         $global_php = app_path().'/start/global.php';
 
-        $find = "Log::useFiles(storage_path().'/logs/laravel.log');"
+        $find = "Log::useFiles(storage_path().'/logs/laravel.log');";
         $replace = "/* Log initialization moved to 'app/start/local.php' and 'app/start/production.php' files. */";
 
         $this->createBackupFile($global_php);
