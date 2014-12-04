@@ -198,9 +198,10 @@ class Configurator {
                 {
                     continue;
                 }
+
+                $this->createBackupFile($destPath);
             }
 
-            $this->createBackupFile($destPath);
             copy($srcPath, $destPath);
         }
 
