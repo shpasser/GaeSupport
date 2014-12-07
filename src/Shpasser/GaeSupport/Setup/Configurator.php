@@ -41,7 +41,7 @@ class Configurator {
         {
             $app_yaml      = app_path().'/../app.yaml';
             $publicPath    = app_path().'/../public';
-            $php_ini       = app_path().'../php.ini';
+            $php_ini       = app_path().'/../php.ini';
 
             $this->generateAppYaml($appId, $app_yaml, $publicPath);
             $this->generatePhpIni($appId, $php_ini);
