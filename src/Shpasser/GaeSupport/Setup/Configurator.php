@@ -4,6 +4,7 @@ use Illuminate\Console\Command;
 
 /**
  * Class Configurator
+ *
  * @package Shpasser\GaeSupport\Setup
  */
 
@@ -19,31 +20,42 @@ class Configurator {
     /**
      * Configures a Laravel app to be deployed on GAE.
      *
-     * @param $appId the GAE application ID.
-     * @param $generateConfig if 'true' => generate GAE config files(app.yaml and php.ini).
+     * @param string $appId the GAE application ID.
+     * @param bool $generateConfig if 'true' => generate GAE config files(app.yaml and php.ini).
      */
     public function configure($appId, $generateConfig)
     {
-        $this->replaceAppClass();
-        $this->generateProductionConfig();
-        $this->commentOutDefaultLogInit();
-        $this->generateLogInit();
-        $this->replaceLaravelServiceProviders();
+        $start_php     = app_path().'/../bootstrap/start.php';
+        $app_php       = app_path().'/config/app.php';
+        $productionDir = app_path().'/config/production';
+        $global_php    = app_path().'/start/global.php';
+        $startDir      = app_path().'/start';
+
+        $this->replaceAppClass($start_php);
+        $this->replaceLaravelServiceProviders($app_php);
+        $this->generateProductionConfig($productionDir);
+        $this->commentOutDefaultLogInit($global_php);
+        $this->generateLogInit($startDir);
 
         if ($generateConfig)
         {
-            $this->generateAppYaml($appId);
-            $this->generatePhpIni($appId);
+            $app_yaml      = app_path().'/../app.yaml';
+            $publicPath    = app_path().'/../public';
+            $php_ini       = app_path().'../php.ini';
+
+            $this->generateAppYaml($appId, $app_yaml, $publicPath);
+            $this->generatePhpIni($appId, $php_ini);
         }
     }
 
     /**
      * Replaces the Laravel application class
      * with the one compatible with GAE.
+     *
+     * @param string $start_php the 'bootstrap/start.php' file path.
      */
-    protected function replaceAppClass()
+    protected function replaceAppClass($start_php)
     {
-        $start_php = app_path().'/../bootstrap/start.php';
         $this->createBackupFile($start_php);
 
         $contents = file_get_contents($start_php);
@@ -66,10 +78,11 @@ class Configurator {
     /**
      * Replaces the Laravel service providers
      * with GAE compatible ones.
+     *
+     * @param string $app_php the Laravel 'app/config/app.php' file path.
      */
-    protected function replaceLaravelServiceProviders()
+    protected function replaceLaravelServiceProviders($app_php)
     {
-        $app_php = app_path().'/config/app.php';
         $this->createBackupFile($app_php);
 
         $contents = file_get_contents($app_php);
@@ -102,11 +115,11 @@ class Configurator {
     /**
      * Generates the configuration files
      * for a Laravel GAE app.
+     *
+     * @param string $productionDir the Laravel 'app/config' dir path.
      */
-    protected function generateProductionConfig()
+    protected function generateProductionConfig($productionDir)
     {
-        $productionDir = app_path().'/config/production';
-
         if (file_exists($productionDir))
         {
             $overwrite = $this->myCommand->confirm(
@@ -144,11 +157,11 @@ class Configurator {
 
     /**
      * Comments out the default log initialization code.
+     *
+     * @param string $global_php the Laravel 'app/start/global.php' file path.
      */
-    protected function commentOutDefaultLogInit()
+    protected function commentOutDefaultLogInit($global_php)
     {
-        $global_php = app_path().'/start/global.php';
-
         $find = "Log::useFiles(storage_path().'/logs/laravel.log');";
         $replace = "/* Log initialization moved to 'app/start/local.php' and 'app/start/production.php' files. */";
 
@@ -172,10 +185,11 @@ class Configurator {
     /**
      * Generates the log initialization
      * for a Laravel GAE app.
+     *
+     * @param string $startDir the Laravel 'app/start' directory path.
      */
-    protected function generateLogInit()
+    protected function generateLogInit($startDir)
     {
-        $startDir = app_path().'/start';
         $startTemplatesPath = __DIR__.'/templates/start';
 
         $startFiles = [
@@ -209,14 +223,14 @@ class Configurator {
     }
 
     /**
-     * Generates a "app.yaml" file for a GAE app with
-     * @param $appId the GAE app id
+     * Generates a "app.yaml" file for a GAE app.
+     *
+     * @param string $appId the GAE app id.
+     * @param string $filePath the 'app.yaml' file path.
+     * @param string $publicPath the application public dir path.
      */
-    protected function generateAppYaml($appId)
+    protected function generateAppYaml($appId, $filePath, $publicPath)
     {
-        $filePath   = app_path().'/../app.yaml';
-        $publicPath = app_path().'/../public';
-
         if (file_exists($filePath))
         {
             $overwrite = $this->myCommand->confirm(
@@ -283,13 +297,13 @@ EOT;
     }
 
     /**
-     * Generates a "php.ini" file for a GAE app with
-     * @param $appId the GAE app id
+     * Generates a "php.ini" file for a GAE app.
+     *
+     * @param string $appId the GAE app id.
+     * @param string $filePath the 'php.ini' file path.
      */
-    protected function generatePhpIni($appId)
+    protected function generatePhpIni($appId, $filePath)
     {
-        $filePath = app_path().'/../php.ini';
-
         if (file_exists($filePath))
         {
             $overwrite = $this->myCommand->confirm(
@@ -317,7 +331,7 @@ EOT;
     /**
      * Creates a backup copy of a desired file.
      *
-     * @param $filePath the file path
+     * @param string $filePath the file path.
      */
     protected function createBackupFile($filePath)
     {
