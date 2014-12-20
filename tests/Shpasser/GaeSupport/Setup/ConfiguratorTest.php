@@ -157,9 +157,10 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase {
     public function testGeneratePhpIni()
     {
         $appId    = 'laravel-app-gae-id';
+        $bucketId = null;
         $php_ini  = __DIR__.'/playground/php.ini';
         $expected = __DIR__.'/playground/php.ini_expected_result';
-        $this->call('generatePhpIni', [ $appId, $php_ini ]);
+        $this->call('generatePhpIni', [ $appId, $bucketId, $php_ini ]);
         $this->assertFileEquals($php_ini, $expected);
     }
 
