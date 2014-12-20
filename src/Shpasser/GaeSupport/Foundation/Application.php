@@ -45,7 +45,7 @@ class Application extends IlluminateApplication {
      *
      * In order for 'gae_realpath()' function to be called the code has
      * to be patched to use 'gae_realpath()' instead of 'realpath()'
-     * using the command 'php artisan gae:deploy you@gmail.com'
+     * using the command 'php artisan gae:deploy --config you@gmail.com'
      * from the terminal.
      */
     protected function detectGae()
@@ -58,7 +58,7 @@ class Application extends IlluminateApplication {
 
         $AppIdentityService = self::GAE_ID_SERVICE;
         $this->appId = $AppIdentityService::getApplicationId();
-        $this->runningOnGae = isset($this->appId) && !preg_match('/dev~/', $this->appId);
+        $this->runningOnGae = ! preg_match('/dev~/', getenv('APPLICATION_ID'));
 
         if ($this->runningOnGae) {
             require_once(__DIR__ . '/gae_realpath.php');

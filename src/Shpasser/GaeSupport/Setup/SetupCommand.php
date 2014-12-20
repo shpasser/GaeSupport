@@ -36,7 +36,10 @@ class SetupCommand extends Command {
 	public function fire()
 	{
 		$configurator = new Configurator($this);
-		$configurator->configure($this->argument('app-id'), $this->option('config'));
+		$configurator->configure(
+			$this->argument('app-id'),
+			$this->option('config'),
+			$this->option('bucket'));
 	}
 
 	/**
@@ -60,6 +63,7 @@ class SetupCommand extends Command {
 	{
 		return array(
 			array('config', null, InputOption::VALUE_NONE, 'Generate "app.yaml" and "php.ini" config files.', null),
+			array('bucket', null, InputOption::VALUE_REQUIRED, 'Use the specified gs-bucket instead of the default one.', null),
 		);
 	}
 

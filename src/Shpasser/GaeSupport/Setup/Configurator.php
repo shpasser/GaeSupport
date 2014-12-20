@@ -23,7 +23,7 @@ class Configurator {
      * @param string $appId the GAE application ID.
      * @param bool $generateConfig if 'true' => generate GAE config files(app.yaml and php.ini).
      */
-    public function configure($appId, $generateConfig)
+    public function configure($appId, $generateConfig, $bucketId)
     {
         $start_php     = app_path().'/../bootstrap/start.php';
         $app_php       = app_path().'/config/app.php';
@@ -44,7 +44,7 @@ class Configurator {
             $php_ini       = app_path().'/../php.ini';
 
             $this->generateAppYaml($appId, $app_yaml, $publicPath);
-            $this->generatePhpIni($appId, $php_ini);
+            $this->generatePhpIni($appId, $bucketId, $php_ini);
         }
     }
 
@@ -56,8 +56,6 @@ class Configurator {
      */
     protected function replaceAppClass($start_php)
     {
-        $this->createBackupFile($start_php);
-
         $contents = file_get_contents($start_php);
 
         $modified = str_replace(
@@ -69,6 +67,8 @@ class Configurator {
         {
             return;
         }
+
+        $this->createBackupFile($start_php);
 
         file_put_contents($start_php, $modified);
 
@@ -83,8 +83,6 @@ class Configurator {
      */
     protected function replaceLaravelServiceProviders($app_php)
     {
-        $this->createBackupFile($app_php);
-
         $contents = file_get_contents($app_php);
 
         $strings = [
@@ -106,6 +104,8 @@ class Configurator {
         {
             return;
         }
+
+        $this->createBackupFile($app_php);
 
         file_put_contents($app_php, $modified);
 
@@ -165,8 +165,6 @@ class Configurator {
         $find = "Log::useFiles(storage_path().'/logs/laravel.log');";
         $replace = "/* Log initialization moved to 'app/start/local.php' and 'app/start/production.php' files. */";
 
-        $this->createBackupFile($global_php);
-
         $contents = file_get_contents($global_php);
 
         $modified = str_replace($find, $replace, $contents);
@@ -176,10 +174,11 @@ class Configurator {
             return;
         }
 
+        $this->createBackupFile($global_php);
+
         file_put_contents($global_php, $modified);
 
         $this->myCommand->info('Commented out the default log initialization code in "global.php".');
-
     }
 
     /**
@@ -300,9 +299,10 @@ EOT;
      * Generates a "php.ini" file for a GAE app.
      *
      * @param string $appId the GAE app id.
+     * @param string bucketId the GAE gs-bucket id.
      * @param string $filePath the 'php.ini' file path.
      */
-    protected function generatePhpIni($appId, $filePath)
+    protected function generatePhpIni($appId, $bucketId, $filePath)
     {
         if (file_exists($filePath))
         {
@@ -316,11 +316,17 @@ EOT;
             }
         }
 
+        $storageBucket = "{$appId}.appspot.com";
+        if ($bucketId !== null)
+        {
+            $storageBucket = $bucketId;
+        }
+
         $contents =
 <<<EOT
 ; enable function that are disabled by default in the App Engine PHP runtime
 google_app_engine.enable_functions = "php_sapi_name, php_uname, getmypid"
-google_app_engine.allow_include_gs_buckets = "{$appId}.appspot.com"
+google_app_engine.allow_include_gs_buckets = "{$storageBucket}"
 allow_url_include = 1
 EOT;
         file_put_contents($filePath, $contents);

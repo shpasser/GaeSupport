@@ -31,7 +31,14 @@ Then include the service provider within `app/config/app.php`.
 Generate the GAE related files / entries.
 
 ```bash
-php artisan gae:setup --config `your-app-id`
+php artisan gae:setup --config your-app-id
+```
+
+The default GCS bucket is configured unless a custom bucket id is defined using
+the `--bucket` option.
+
+```bash
+php artisan gae:setup --config --bucket="your-bucket-id" your-app-id
 ```
 
 ### Mail
