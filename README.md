@@ -8,6 +8,7 @@ Currently supported features:
 - Queue service provider.
 
 For Laravel 5 see https://github.com/shpasser/GaeSupportL5.
+For Lumen see https://github.com/shpasser/GaeSupportLumen.
 
 ## Installation
 
